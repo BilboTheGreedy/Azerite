@@ -2,7 +2,7 @@
 
 Query your guilds Azerite level and check if they achieved set goals for the guild :)
 
-Download precompiled bin, see releases page. 
+Download precompiled bin, [see releases page](https://github.com/BilboTheGreedy/Azerite/releases). 
 
 ## Usage
 
