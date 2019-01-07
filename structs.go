@@ -2,6 +2,7 @@ package main
 
 type Configuration struct {
 	Characters   []*Character
+	Region       string
 	Guild        string
 	Realm        string
 	GuildRanks   []int
