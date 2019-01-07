@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/negah/percent"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -83,17 +84,23 @@ func main() {
 
 	fmt.Println(fmt.Sprintf("\n%s\n", strings.Repeat("#", 100)))
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Goal", "Character", "Level"})
+	table.SetHeader([]string{"Goal", "Character", "Neck", "% lvl"})
 	table.SetFooter([]string{"", "", "Goal", strconv.Itoa(Goal)}) // Add Footer
 	table.SetBorder(false)
 	for _, character := range config.Characters {
 		if Goal <= character.Items.Neck.AzeriteItem.AzeriteLevel && *showAbove {
-			data := []string{"Yes", character.Name, strconv.Itoa(character.Items.Neck.AzeriteItem.AzeriteLevel)}
+			perc := percent.PercentOf(character.Items.Neck.AzeriteItem.AzeriteExperience, character.Items.Neck.AzeriteItem.AzeriteExperienceRemaining)
+			pstr := fmt.Sprintf("%.1f", perc)
+			data := []string{"Yes", character.Name, strconv.Itoa(character.Items.Neck.AzeriteItem.AzeriteLevel), pstr}
+
 			table.Append(data)
+
 			//fmt.Println("Goal: Yes\t", character.Name+"\t", character.Items.Neck.AzeriteItem.AzeriteLevel)
 		}
 		if Goal > character.Items.Neck.AzeriteItem.AzeriteLevel && *showBelow {
-			data := []string{"No", character.Name, strconv.Itoa(character.Items.Neck.AzeriteItem.AzeriteLevel)}
+			perc := percent.PercentOf(character.Items.Neck.AzeriteItem.AzeriteExperience, character.Items.Neck.AzeriteItem.AzeriteExperienceRemaining)
+			pstr := fmt.Sprintf("%.1f", perc)
+			data := []string{"No", character.Name, strconv.Itoa(character.Items.Neck.AzeriteItem.AzeriteLevel), pstr}
 			table.Append(data)
 			//fmt.Println("Goal No\t:", character.Name+"\t", character.Items.Neck.AzeriteItem.AzeriteLevel)
 		}
@@ -109,7 +116,10 @@ func (character *Character) QueryCharacter() {
 
 func worker(id int, config Configuration, characters <-chan *Character, done chan<- bool) {
 	for character := range characters {
-		fmt.Println("Worker", id, ": Received job", character.Name)
+		if debug == true {
+			fmt.Println("Worker", id, ": Received job", character.Name)
+		}
+
 		character.QueryCharacter()
 		done <- true
 	}

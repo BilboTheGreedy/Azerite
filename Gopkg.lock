@@ -10,6 +10,14 @@
   version = "v0.0.4"
 
 [[projects]]
+  branch = "master"
+  digest = "1:a67bad6dd2ae540680df82cc80b7933686ab3a714678f54bf8cd7478f089eba3"
+  name = "github.com/negah/percent"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "be1f204e4ed74c70115ee8ec24fd5c2328e4eabf"
+
+[[projects]]
   digest = "1:abcdbf03ca6ca13d3697e2186edc1f33863bbdac2b3a44dfa39015e8903f7409"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
@@ -20,6 +28,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/olekukonko/tablewriter"]
+  input-imports = [
+    "github.com/negah/percent",
+    "github.com/olekukonko/tablewriter",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
