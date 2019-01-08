@@ -1,7 +1,7 @@
 {
     "Region": "eu",
     "Realm": "tarren-mill",
-    "Guild": "Method",
+    "Guild": "SPEL",
     "GuildRanks": [
         5,
         4,
@@ -9,5 +9,7 @@
         2,
         1,
         0
-    ]
+    ],
+    "ClientID": "1ce0f417b6a34757b9f565e62266fc05",
+    "ClientSecret": "bkSwPrSG2f43Fjh9IGDYz41EFzt2XuxK"
 }

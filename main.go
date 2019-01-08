@@ -2,9 +2,11 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -32,6 +34,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "debug")
 	flag.IntVar(&Goal, "goal", 38, "Azerite neck level goal")
 	flag.Parse()
+
 	cfgFile := "config.json"
 
 	// read the configuration
@@ -47,8 +50,10 @@ func main() {
 		fmt.Println("Could not decode configuration file", cfgFile)
 	}
 	region = config.Region
+	GetToken(config.ClientID, config.ClientSecret, &config.Session)
+
 	//Get guild members with specified rank
-	GetGuildMembers(region, config.Realm, config.Guild, &config.GuildMembers, debug)
+	GetGuildMembers(config.Session.AccessToken, region, config.Realm, config.Guild, &config.GuildMembers, debug)
 	for _, member := range config.GuildMembers.Members {
 		for _, v := range config.GuildRanks {
 			if v == member.Rank {
@@ -125,11 +130,11 @@ func worker(id int, config Configuration, characters <-chan *Character, done cha
 	}
 }
 
-func GetGuildMembers(region string, realm string, guild string, target interface{}, debug bool) error {
+func GetGuildMembers(Token string, region string, realm string, guild string, target interface{}, debug bool) error {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	url := "https://" + region + ".api.blizzard.com/wow/guild/" + realm + "/" + guild + "?fields=members&locale=en_US&access_token=USHjtIcb3fA47RBFc7f431Q1fCol2HzSUU"
+	url := "https://" + region + ".api.blizzard.com/wow/guild/" + realm + "/" + guild + "?fields=members&locale=en_US&access_token=" + Token
 	if debug == true {
 		fmt.Println("URL:>", url)
 	}
@@ -153,7 +158,7 @@ func GetCharacter(region string, realm string, char string, target interface{}, 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	url := "https://" + region + ".api.blizzard.com/wow/character/" + realm + "/" + char + "?fields=items&locale=en_US&access_token=USHjtIcb3fA47RBFc7f431Q1fCol2HzSUU"
+	url := "https://" + region + ".api.blizzard.com/wow/character/" + realm + "/" + char + "?fields=items&locale=en_US&access_token=USBPWVe8bNBkRvYkVT6nTtdMrAobinNEXD"
 	if debug == true {
 		fmt.Println("URL:>", url)
 	}
@@ -168,6 +173,48 @@ func GetCharacter(region string, realm string, char string, target interface{}, 
 		panic(err)
 	}
 	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(&target)
+
+}
+
+func basicAuth(username string, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
+//GetToken  auth token
+func GetToken(ClientID string, ClientSecret string, target interface{}) error {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	if debug == true {
+		fmt.Println("URL:>", "https://"+region+".battle.net/oauth/token")
+	}
+
+	values := url.Values{}
+	values.Add("grant_type", "client_credentials")
+
+	req, err := http.NewRequest("POST", "https://eu.battle.net/oauth/token", strings.NewReader(values.Encode()))
+	req.Header.Add("Authorization", "Basic "+basicAuth(ClientID, ClientSecret))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{Transport: tr}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	if resp.StatusCode != 200 && debug == true {
+		fmt.Println("response Status:", resp.Status)
+
+	}
 
 	return json.NewDecoder(resp.Body).Decode(&target)
 

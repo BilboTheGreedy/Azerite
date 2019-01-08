@@ -1,5 +1,11 @@
 package main
 
+type Session struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
 type Configuration struct {
 	Characters   []*Character
 	Region       string
@@ -7,6 +13,9 @@ type Configuration struct {
 	Realm        string
 	GuildRanks   []int
 	GuildMembers Guild
+	ClientID     string
+	ClientSecret string
+	Session      Session
 }
 
 type Guild struct {
