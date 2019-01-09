@@ -27,6 +27,7 @@ type Client struct {
 var Goal int
 var debug bool
 var region string
+var token string
 
 func main() {
 	var showBelow = flag.Bool("below", false, "show characters below goal")
@@ -51,9 +52,9 @@ func main() {
 	}
 	region = config.Region
 	GetToken(config.ClientID, config.ClientSecret, &config.Session)
-
+	token = config.Session.AccessToken
 	//Get guild members with specified rank
-	GetGuildMembers(config.Session.AccessToken, region, config.Realm, config.Guild, &config.GuildMembers, debug)
+	GetGuildMembers(region, config.Realm, config.Guild, &config.GuildMembers, debug)
 	for _, member := range config.GuildMembers.Members {
 		for _, v := range config.GuildRanks {
 			if v == member.Rank {
@@ -130,11 +131,11 @@ func worker(id int, config Configuration, characters <-chan *Character, done cha
 	}
 }
 
-func GetGuildMembers(Token string, region string, realm string, guild string, target interface{}, debug bool) error {
+func GetGuildMembers(region string, realm string, guild string, target interface{}, debug bool) error {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	url := "https://" + region + ".api.blizzard.com/wow/guild/" + realm + "/" + guild + "?fields=members&locale=en_US&access_token=" + Token
+	url := "https://" + region + ".api.blizzard.com/wow/guild/" + realm + "/" + guild + "?fields=members&locale=en_US&access_token=" + token
 	if debug == true {
 		fmt.Println("URL:>", url)
 	}
@@ -158,7 +159,7 @@ func GetCharacter(region string, realm string, char string, target interface{}, 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	url := "https://" + region + ".api.blizzard.com/wow/character/" + realm + "/" + char + "?fields=items&locale=en_US&access_token=USBPWVe8bNBkRvYkVT6nTtdMrAobinNEXD"
+	url := "https://" + region + ".api.blizzard.com/wow/character/" + realm + "/" + char + "?fields=items&locale=en_US&access_token=" + token
 	if debug == true {
 		fmt.Println("URL:>", url)
 	}
